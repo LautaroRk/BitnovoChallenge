@@ -5,13 +5,15 @@ import { useState } from 'react';
 import Button from '../components/Button';
 import colors from '../constants/colors';
 import { formatToTwoDecimalsString } from '../utils/stringUtils';
+import SelectCurrencyModal from '../components/SelectCurrencyModal';
 
 export default function CreatePayment() {
   const [value, setValue] = useState('');
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState('USD');
+  const [concept, setConcept] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
   const [hasChanged, setHasChanged] = useState(false);
   const [isConceptFocused, setIsConceptFocused] = useState(false);
-  const [concept, setConcept] = useState('');
 
   const currencyChar = {
     USD: "$",
@@ -42,19 +44,27 @@ export default function CreatePayment() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+
+      <SelectCurrencyModal
+        isVisible={modalVisible}
+        setIsVisible={setModalVisible}
+        selectedCurrency={currency}
+        setCurrency={setCurrency}
+      />
+
       <Header 
         title="Crear pago"
         btnRight={{ 
           text: currency,
-          icon: <AntDesign name="down" size={16} color={colors.complementary} />,
-          onPress: () => {}
+          icon: <AntDesign name="down" size={16} color={colors.primaryDark} />,
+          onPress: () => setModalVisible(true),
         }}
       />
       
       <View style={styles.content}>
         <View style={styles.topContent}>
           <View style={styles.amountInputContainer}>
-            <Text style={[styles.amountInput, !hasChanged && styles.grayed]}>
+            <Text style={[styles.currency, !hasChanged && styles.grayed]}>
               {currencyChar[currency]}
             </Text>
             <TextInput 
@@ -124,6 +134,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
     marginTop: 50,
+  },
+  currency: {
+    fontSize: 40,
+    fontWeight: 500,
+    lineHeight: 50,
+    textAlign: 'center',
+    color: colors.primary,
+    marginRight: 5,
   },
   amountInput: {
     fontSize: 40,

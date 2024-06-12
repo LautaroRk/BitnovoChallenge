@@ -1,12 +1,12 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import colors from "../constants/colors";
 
-export default function SmallButton({ text = "", icon = null, onPress }) {
+export default function SmallButton({ text = null, icon = null, onPress }) {
   return (
-    <View onClick={onPress} style={styles.container}>
-      <Text style={styles.text}>{text}</Text>
+    <TouchableOpacity onPress={onPress} style={styles.container}>
+      {text && <Text style={styles.text}>{text}</Text>}
       {icon && icon}
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -17,10 +17,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 7,
-    borderRadius: 15,
-    paddingVertical: 6,
+    borderRadius: 50,
+    height: 34,
+    paddingVertical: 8,
     paddingHorizontal: 10,
-    backgroundColor: colors.complementaryLight,
+    backgroundColor: colors.lightShadow,
+    alignSelf: 'flex-start'
   },
   text: {
     fontSize: 12,

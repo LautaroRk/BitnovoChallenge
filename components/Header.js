@@ -1,18 +1,22 @@
 import { StyleSheet, Text, View } from "react-native";
-import Button from "./SmallButton";
+import SmallButton from "./SmallButton";
 import colors from "../constants/colors";
+import { Ionicons } from '@expo/vector-icons';
 
-export default function Header({ title, btnRight = null, btnLeft = null }) {
+const GoBackIcon = <Ionicons name="arrow-back" size={16} color={colors.primaryDark} />;
+const GoBackButton = ({ action }) => <SmallButton onPress={action} icon={GoBackIcon} />;
+
+export default function Header({ title, btnRight = null, showBackBtn = false, backBtnAction = () => {}, noBorder = false }) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, noBorder && styles.noBorder]}>
       <View style={styles.btnContainer}>
-        {btnLeft ? <Button onPress={btnLeft.onPress} text={btnLeft.text} icon={btnLeft.icon} /> : <View />}
+        {showBackBtn ? <GoBackButton action={backBtnAction} /> : <View />}
       </View>
 
       <Text style={styles.title}>{title}</Text>
 
       <View style={styles.btnContainer}>
-        {btnRight ? <Button onPress={btnRight.onPress} text={btnRight.text} icon={btnRight.icon} /> : <View />}
+        {btnRight ? <SmallButton onPress={btnRight.onPress} text={btnRight.text} icon={btnRight.icon} /> : <View />}
       </View>
     </View>
   );
@@ -29,11 +33,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.lightShadow,
   },
+  noBorder: {
+    borderBottomWidth: 0,
+  },
   title: {
     fontSize: 18,
     fontWeight: 700,
     lineHeight: 22,
     textAlign: 'center',
+    alignSelf: 'center',
     color: colors.primaryDark,
   },
   btnContainer: {
