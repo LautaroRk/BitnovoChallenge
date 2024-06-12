@@ -2,11 +2,12 @@ import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-na
 import Header from "./Header";
 import colors from "../constants/colors";
 import SearchBar from "./SearchBar";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import EuroImg from "../assets/currencies/eur.png";
 import DollarImg from "../assets/currencies/usd.png";
 import PoundImg from "../assets/currencies/gbp.png";
 import { AntDesign } from "@expo/vector-icons";
+import { PaymentContext } from "../context/PaymentContext";
 
 function CurrencyItem({ currency, name, imgSrc, selectedCurrency, selectCurrency }) {
   const isSelected = currency === selectedCurrency;
@@ -26,21 +27,10 @@ function CurrencyItem({ currency, name, imgSrc, selectedCurrency, selectCurrency
   );
 }
 
-export default function SelectCurrencyModal({ isVisible, setIsVisible, selectedCurrency, setCurrency }) {
+export default function SelectCurrencyModal({ isVisible, setIsVisible }) {
   const [searchPhrase, setSearchPhrase] = useState("");
-
-  // const paymentContext = useContext(PaymentContext);
-  // const currentCurrency = paymentContext.currency;
-  // console.log(currentCurrency)
-
-  // const [selectedCurrency, setSelectedCurrency] = useState(currentCurrency);
-
-  // const contextValue = useMemo(() => ({
-  //   ...paymentContext,
-  //   currency: selectedCurrency,
-  // }), [paymentContext, selectedCurrency]);
-
-  // console.log(contextValue)
+  
+  const { currency: selectedCurrency, setCurrency }  = useContext(PaymentContext);
 
   const closeModal = () => {
     setSearchPhrase("");

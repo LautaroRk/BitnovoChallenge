@@ -6,9 +6,10 @@ import Button from '../components/Button';
 import colors from '../constants/colors';
 import { formatToTwoDecimalsString } from '../utils/stringUtils';
 import SelectCurrencyModal from '../components/SelectCurrencyModal';
+import { PaymentContext } from '../context/PaymentContext';
 
 export default function CreatePayment() {
-  const [value, setValue] = useState('');
+  const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState('USD');
   const [concept, setConcept] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -21,90 +22,92 @@ export default function CreatePayment() {
     GBP: "£",
   };
 
-  const handleAmountChange = (value) => {
+  const handleAmountChange = (amount) => {
     setHasChanged(true);
-    const formattedValue = value;
+    const formattedValue = amount;
     const dotCount = formattedValue.split(',').length - 1;
     if (dotCount > 1) return;
     if (formattedValue.split(',')[1]?.length > 2) return;
-    if (value.length === 0 || value.startsWith('.') || value.startsWith(',') || value.startsWith('0')) {
-      setValue('');
+    if (amount.length === 0 || amount.startsWith('.') || amount.startsWith(',') || amount.startsWith('0')) {
+      setAmount('');
       setHasChanged(false);
       return;
     }
-    setValue(formattedValue);
+    setAmount(formattedValue);
   };
 
   const handleSetAmount = () => {
-    const formattedValue = formatToTwoDecimalsString(value);
-    setValue(formattedValue);
+    const formattedValue = formatToTwoDecimalsString(amount);
+    setAmount(formattedValue);
   };
 
   const validConcept = concept.length <= 140;
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <PaymentContext.Provider value={{ amount, setAmount, currency, setCurrency, concept }}>
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 
-      <SelectCurrencyModal
-        isVisible={modalVisible}
-        setIsVisible={setModalVisible}
-        selectedCurrency={currency}
-        setCurrency={setCurrency}
-      />
+        <SelectCurrencyModal
+          isVisible={modalVisible}
+          setIsVisible={setModalVisible}
+          selectedCurrency={currency}
+          setCurrency={setCurrency}
+        />
 
-      <Header 
-        title="Crear pago"
-        btnRight={{ 
-          text: currency,
-          icon: <AntDesign name="down" size={16} color={colors.primaryDark} />,
-          onPress: () => setModalVisible(true),
-        }}
-      />
-      
-      <View style={styles.content}>
-        <View style={styles.topContent}>
-          <View style={styles.amountInputContainer}>
-            <Text style={[styles.currency, !hasChanged && styles.grayed]}>
-              {currencyChar[currency]}
-            </Text>
-            <TextInput 
-              style={[styles.amountInput, !hasChanged && styles.grayed]} 
-              value={value} 
-              placeholder='0,00' 
-              placeholderTextColor={colors.lightGrey}
-              onChangeText={handleAmountChange} 
-              onEndEditing={handleSetAmount} 
-              inputMode='decimal' 
-            />
+        <Header 
+          title="Crear pago"
+          btnRight={{ 
+            text: currency,
+            icon: <AntDesign name="down" size={16} color={colors.primaryDark} />,
+            onPress: () => setModalVisible(true),
+          }}
+        />
+        
+        <View style={styles.content}>
+          <View style={styles.topContent}>
+            <View style={styles.amountInputContainer}>
+              <Text style={[styles.currency, !hasChanged && styles.grayed]}>
+                {currencyChar[currency]}
+              </Text>
+              <TextInput 
+                style={[styles.amountInput, !hasChanged && styles.grayed]} 
+                value={amount} 
+                placeholder='0,00' 
+                placeholderTextColor={colors.lightGrey}
+                onChangeText={handleAmountChange} 
+                onEndEditing={handleSetAmount} 
+                inputMode='decimal' 
+              />
+            </View>
+
+            <View style={styles.conceptInputContainer}>
+              <Text style={styles.conceptLabel}>Concepto</Text>
+              <TextInput 
+                inputMode='text' 
+                style={[styles.conceptInput, isConceptFocused && styles.onfocus]} 
+                placeholder='Añade descripción del pago' 
+                value={concept}
+                onChangeText={setConcept}
+                onBlur={() => setIsConceptFocused(false)} 
+                onFocus={() => setIsConceptFocused(true)}
+                multiline 
+              />
+              <Text style={[styles.charCount, !validConcept && styles.invalidConcept]}>
+                {concept.length} / 140 caracteres
+              </Text>
+            </View>
           </View>
 
-          <View style={styles.conceptInputContainer}>
-            <Text style={styles.conceptLabel}>Concepto</Text>
-            <TextInput 
-              inputMode='text' 
-              style={[styles.conceptInput, isConceptFocused && styles.onfocus]} 
-              placeholder='Añade descripción del pago' 
-              value={concept}
-              onChangeText={setConcept}
-              onBlur={() => setIsConceptFocused(false)} 
-              onFocus={() => setIsConceptFocused(true)}
-              multiline 
+          <View style={styles.bottomContent}>
+            <Button 
+              text='Continuar' 
+              onPress={() => {}} 
+              disabled={!amount || amount.length === 0 || amount === '0.00' || !validConcept}
             />
-            <Text style={[styles.charCount, !validConcept && styles.invalidConcept]}>
-              {concept.length} / 140 caracteres
-            </Text>
-          </View>
+          </View> 
         </View>
-
-        <View style={styles.bottomContent}>
-          <Button 
-            text='Continuar' 
-            onPress={() => {}} 
-            disabled={!value || value.length === 0 || value === '0.00' || !validConcept}
-          />
-        </View> 
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </PaymentContext.Provider>
   );
 }
 
