@@ -5,10 +5,10 @@
     "scheme": "bitnovo-challenge",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/bitnovo-logo.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/bitnovo-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,15 +17,24 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/bitnovo-logo.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.lautarork.BitnovoChallenge"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/bitnovo-logo.png"
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "402f1cfa-ad45-4769-99a8-da335a5d7a8e"
+      }
+    }
   }
 }

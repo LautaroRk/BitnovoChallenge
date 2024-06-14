@@ -1,0 +1,36 @@
+{
+  "build": {
+    "preview": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://payments.pre-bnvo.com/api/v1",
+        "EXPO_PUBLIC_X_DEVICE_ID": "57ebf48c-f248-4676-ba83-4c260f6cbaeb"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview2": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease"
+      }
+    },
+    "preview3": {
+      "developmentClient": true
+    },
+    "preview4": {
+      "distribution": "internal"
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://payments.pre-bnvo.com/api/v1",
+        "EXPO_PUBLIC_X_DEVICE_ID": "57ebf48c-f248-4676-ba83-4c260f6cbaeb"
+      }
+    },
+    "test": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://payments.pre-bnvo.com/api/v1",
+        "EXPO_PUBLIC_X_DEVICE_ID": "57ebf48c-f248-4676-ba83-4c260f6cbaeb"
+      }
+    }
+  }
+}

@@ -11,7 +11,7 @@ export const createOrder = async (order) => {
       method: 'POST',
       headers: {
         'Content-Type': 'multipart/form-data',
-        'X-Device-Id': '57ebf48c-f248-4676-ba83-4c260f6cbaeb', // @TODO: This should be a secret
+        'X-Device-Id': process.env.EXPO_PUBLIC_X_DEVICE_ID,
       },
       body: formData,
     });

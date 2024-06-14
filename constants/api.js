@@ -1,1 +1,1 @@
-export const API_URL = "https://payments.pre-bnvo.com/api/v1";
+export const API_URL = process.env.EXPO_PUBLIC_API_URL;
