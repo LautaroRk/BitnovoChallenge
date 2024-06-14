@@ -1,26 +1,30 @@
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import Header from '../components/Header';
 import { AntDesign } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import Button from '../components/Button';
 import colors from '../constants/colors';
-import { formatToTwoDecimalsString } from '../utils/stringUtils';
-import SelectCurrencyModal from '../components/SelectCurrencyModal';
+import { formatToTwoDecimalsString, fromStringToFloat } from '../utils/stringUtils';
 import { PaymentContext } from '../context/PaymentContext';
+import { router } from 'expo-router';
+import { currencyList, currencySymbolMap } from '../constants/currencies';
+import SelectModal from '../components/SelectModal';
+import { createOrder } from '../services/orders.service';
 
-export default function CreatePayment() {
-  const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('USD');
-  const [concept, setConcept] = useState('');
+export default function CreatePaymentScreen() {
+  const { 
+    amount, setAmount,
+    currency, setCurrency,
+    concept, setConcept,
+    setPaymentUrl, setOrderId,
+  } = useContext(PaymentContext);
+  
   const [modalVisible, setModalVisible] = useState(false);
   const [hasChanged, setHasChanged] = useState(false);
   const [isConceptFocused, setIsConceptFocused] = useState(false);
 
-  const currencyChar = {
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-  };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleAmountChange = (amount) => {
     setHasChanged(true);
@@ -28,7 +32,7 @@ export default function CreatePayment() {
     const dotCount = formattedValue.split(',').length - 1;
     if (dotCount > 1) return;
     if (formattedValue.split(',')[1]?.length > 2) return;
-    if (amount.length === 0 || amount.startsWith('.') || amount.startsWith(',') || amount.startsWith('0')) {
+    if (amount.length === 0 || amount.startsWith('.') || amount.startsWith(',')) {
       setAmount('');
       setHasChanged(false);
       return;
@@ -43,15 +47,44 @@ export default function CreatePayment() {
 
   const validConcept = concept.length <= 140;
 
-  return (
-    <PaymentContext.Provider value={{ amount, setAmount, currency, setCurrency, concept }}>
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+  const createPaymentOrder = async () => {
+    setLoading(true);
 
-        <SelectCurrencyModal
+    Keyboard.dismiss();
+
+    const order = {
+      expected_output_amount: fromStringToFloat(amount),
+      fiat: currency,
+      reference: concept,
+    }
+
+    const response = await createOrder(order);
+
+    const url = response['web_url'];
+    const identifier = response['identifier'];
+
+    if (!url) {
+      setError(true);
+      setLoading(false);
+      return;
+    }
+
+    setPaymentUrl(url);
+    setOrderId(identifier);
+    setLoading(false);
+
+    router.navigate('share-link');
+  }
+
+  return (
+      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <SelectModal
           isVisible={modalVisible}
           setIsVisible={setModalVisible}
-          selectedCurrency={currency}
-          setCurrency={setCurrency}
+          title='Selecciona una divisa'
+          options={currencyList}
+          selectedItem={currency}
+          setSelectedItem={setCurrency}
         />
 
         <Header 
@@ -59,25 +92,26 @@ export default function CreatePayment() {
           btnRight={{ 
             text: currency,
             icon: <AntDesign name="down" size={16} color={colors.primaryDark} />,
-            onPress: () => setModalVisible(true),
+            onPress: loading ? () => {} : () => setModalVisible(true),
           }}
         />
         
         <View style={styles.content}>
           <View style={styles.topContent}>
             <View style={styles.amountInputContainer}>
-              <Text style={[styles.currency, !hasChanged && styles.grayed]}>
-                {currencyChar[currency]}
-              </Text>
               <TextInput 
-                style={[styles.amountInput, !hasChanged && styles.grayed]} 
+                style={[styles.amountInput, (!hasChanged || amount.length === 0) && styles.grayed]} 
                 value={amount} 
                 placeholder='0,00' 
                 placeholderTextColor={colors.lightGrey}
                 onChangeText={handleAmountChange} 
                 onEndEditing={handleSetAmount} 
-                inputMode='decimal' 
+                inputMode='decimal'
+                disabled={loading}
               />
+              <Text style={[styles.currency, (!hasChanged || amount.length === 0) && styles.grayed]}>
+                {currencySymbolMap[currency]}
+              </Text>
             </View>
 
             <View style={styles.conceptInputContainer}>
@@ -90,24 +124,26 @@ export default function CreatePayment() {
                 onChangeText={setConcept}
                 onBlur={() => setIsConceptFocused(false)} 
                 onFocus={() => setIsConceptFocused(true)}
-                multiline 
+                multiline
+                disabled={loading}
               />
               <Text style={[styles.charCount, !validConcept && styles.invalidConcept]}>
                 {concept.length} / 140 caracteres
               </Text>
             </View>
+
+            {error ? <Text style={styles.errorMessage}>Ocurrió un error al crear la orden de pago</Text> : null}
           </View>
 
           <View style={styles.bottomContent}>
             <Button 
-              text='Continuar' 
-              onPress={() => {}} 
-              disabled={!amount || amount.length === 0 || amount === '0.00' || !validConcept}
+              text={loading ? 'Creando orden...' : 'Continuar'}
+              onPress={createPaymentOrder}
+              disabled={loading || !amount || amount.length === 0 || amount === '0.00' || !validConcept}
             />
           </View> 
         </View>
       </KeyboardAvoidingView>
-    </PaymentContext.Provider>
   );
 }
 
@@ -138,17 +174,17 @@ const styles = StyleSheet.create({
     gap: 5,
     marginTop: 50,
   },
-  currency: {
-    fontSize: 40,
-    fontWeight: 500,
+  amountInput: {
+    fontSize: 45,
+    fontWeight: '700',
     lineHeight: 50,
     textAlign: 'center',
     color: colors.primary,
-    marginRight: 5,
+    marginRight: 3,
   },
-  amountInput: {
-    fontSize: 40,
-    fontWeight: 700,
+  currency: {
+    fontSize: 45,
+    fontWeight: '700',
     lineHeight: 50,
     textAlign: 'center',
     color: colors.primary,
@@ -167,7 +203,7 @@ const styles = StyleSheet.create({
   },
   conceptInput: {
     fontSize: 16,
-    fontWeight: 400,
+    fontWeight: '400',
     lineHeight: 20,
     textAlign: 'start',
     color: colors.primaryDark,
@@ -180,7 +216,7 @@ const styles = StyleSheet.create({
   },
   charCount: {
     fontSize: 12,
-    fontWeight: 400,
+    fontWeight: '400',
     lineHeight: 16,
     alignSelf: 'flex-end',
     color: colors.lightGrey,
@@ -188,11 +224,17 @@ const styles = StyleSheet.create({
   invalidConcept: {
     color: colors.red,
   },
+  errorMessage: {
+    color: colors.red,
+    fontSize: 14,
+    marginTop: 20,
+    textAlign: 'center',
+  },
   onfocus: {
     borderColor: colors.complementary,
   },
   bottomContent: {
     width: '100%',
-    marginBottom: 50,
+    marginBottom: 130,
   }
 });

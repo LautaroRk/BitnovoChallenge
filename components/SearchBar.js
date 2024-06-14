@@ -2,7 +2,7 @@ import { StyleSheet, TextInput, View } from "react-native";
 import { Feather, Entypo } from "@expo/vector-icons";
 import colors from "../constants/colors";
 
-export default function SearchBar({ searchPhrase, setSearchPhrase }) {
+export default function SearchBar({ searchPhrase, setSearchPhrase, placeholder = "Buscar" }) {
   const clearSearchPhrase = () => setSearchPhrase("");
 
   return (
@@ -15,7 +15,8 @@ export default function SearchBar({ searchPhrase, setSearchPhrase }) {
 
       <TextInput
         style={styles.input}
-        placeholder="Search"
+        placeholder={placeholder}
+        placeholderTextColor={colors.lightGrey}
         value={searchPhrase}
         onChangeText={setSearchPhrase}
       />

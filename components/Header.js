@@ -2,15 +2,20 @@ import { StyleSheet, Text, View } from "react-native";
 import SmallButton from "./SmallButton";
 import colors from "../constants/colors";
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 const GoBackIcon = <Ionicons name="arrow-back" size={16} color={colors.primaryDark} />;
 const GoBackButton = ({ action }) => <SmallButton onPress={action} icon={GoBackIcon} />;
 
-export default function Header({ title, btnRight = null, showBackBtn = false, backBtnAction = () => {}, noBorder = false }) {
+export default function Header({ title, btnRight = null, showBackBtn = false, backBtnAction, noBorder = false }) {
+  const goBack = () => {
+    router.canGoBack() && router.back();
+  }
+
   return (
     <View style={[styles.container, noBorder && styles.noBorder]}>
       <View style={styles.btnContainer}>
-        {showBackBtn ? <GoBackButton action={backBtnAction} /> : <View />}
+        {showBackBtn ? <GoBackButton action={backBtnAction || goBack} /> : <View />}
       </View>
 
       <Text style={styles.title}>{title}</Text>
@@ -25,6 +30,7 @@ export default function Header({ title, btnRight = null, showBackBtn = false, ba
 const styles = StyleSheet.create({
   container: {
     height: 56,
+    marginTop: 56,
     width: '100%',
     display: 'flex',
     flexDirection: 'row',
@@ -38,7 +44,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: 700,
+    fontWeight: '700',
     lineHeight: 22,
     textAlign: 'center',
     alignSelf: 'center',
