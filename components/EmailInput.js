@@ -4,14 +4,16 @@ import { MaterialIcons } from '@expo/vector-icons';
 import colors from "../constants/colors";
 import * as MailComposer from 'expo-mail-composer';
 
-export default function EmailInput({ email, setEmail, isFocused, unfocus, selectMethod, message, setLinkSent }) {
+export default function EmailInput({ email, setEmail, isFocused, selectMethod, message, setLinkSent }) {
   const sendEmailMessage = async () => {
     if (!email) return;
+
     const isServiceAvailable = await MailComposer.isAvailableAsync();
     if (!isServiceAvailable) {
       alert('No se puede enviar correos electrónicos en este dispositivo');
       return;
     }
+
     const response = await MailComposer.composeAsync({
       recipients: [email],
       subject: 'Solicitud de pago',
@@ -21,8 +23,6 @@ export default function EmailInput({ email, setEmail, isFocused, unfocus, select
     if (response.status === 'sent') {
       setLinkSent(true);
     }
-
-    unfocus();
   };
 
   return (

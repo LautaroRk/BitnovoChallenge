@@ -4,15 +4,17 @@ import { AntDesign } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
 import colors from "../constants/colors";
 
-export default function WhatsAppInput({ countryCode, selectCountryCode, phoneNumber, setPhoneNumber, isFocused, unfocus, selectMethod, message }) {
+export default function WhatsAppInput({ countryCode, selectCountryCode, phoneNumber, setPhoneNumber, isFocused, selectMethod, message, setLinkSent }) {
   const sendWhatsAppMessage = () => {
+    if (!phoneNumber || phoneNumber.length === 0) return;
+
     const completePhoneNumber = `${countryCode}${phoneNumber}`;
     const text = encodeURIComponent(message);
 
     const whatsappUrl = `whatsapp://send?phone=${completePhoneNumber}&text=${text}`;
     Linking.openURL(whatsappUrl);
 
-    unfocus();
+    setLinkSent(true);
   };
 
   return (

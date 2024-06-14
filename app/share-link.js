@@ -15,6 +15,7 @@ import { router } from 'expo-router';
 import GenerateQROption from "../components/GenerateQROption";
 import { RootSiblingParent } from 'react-native-root-siblings';
 import useWebSocket from "../hooks/useWebSocket";
+import MessageSentModal from "../components/MessageSentModal";
 
 export default function ShareLinkScreen() {
   const { 
@@ -27,6 +28,8 @@ export default function ShareLinkScreen() {
   } = useContext(PaymentContext);
 
   useWebSocket('share-link');
+  
+  console.log('paymentUrl', paymentUrl);
 
   const currencySymbol = currencySymbolMap[currency];
 
@@ -69,6 +72,7 @@ export default function ShareLinkScreen() {
   return (
     <RootSiblingParent>
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+
         <SelectModal
           isVisible={modalVisible}
           setIsVisible={setModalVisible}
@@ -76,6 +80,15 @@ export default function ShareLinkScreen() {
           options={countryCodesList}
           selectedItem={countryCode}
           setSelectedItem={setCountryCode}
+        />
+
+        <MessageSentModal
+          visible={linkSent}
+          selectedMethod={selectedMethod}
+          closeModal={() => {
+            setLinkSent(false);
+            clearSelectedMethod();
+          }}
         />
 
         <View style={styles.top}>
@@ -109,22 +122,22 @@ export default function ShareLinkScreen() {
               isFocused={selectedMethod === 'email'}
               unfocus={() => setSelectedMethod(null)}
               paymentUrl={paymentUrl}
-              phoneNumber={email}
-              setPhoneNumber={setEmail}
+              email={email}
+              setEmail={setEmail}
               selectMethod={() => setSelectedMethod('email')}
               message={message}
               setLinkSent={setLinkSent}
             />
 
             <WhatsAppInput
-              isFocused={selectedMethod === 'whatsapp'}
+              isFocused={selectedMethod === 'WhatsApp'}
               unfocus={() => setSelectedMethod(null)}
               paymentUrl={paymentUrl}
               countryCode={countryCode}
               phoneNumber={phoneNumber}
               setPhoneNumber={setPhoneNumber}
               selectCountryCode={() => setModalVisible(true)}
-              selectMethod={() => setSelectedMethod('whatsapp')}
+              selectMethod={() => setSelectedMethod('WhatsApp')}
               message={message}
               setLinkSent={setLinkSent}
             />

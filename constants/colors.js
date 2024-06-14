@@ -9,4 +9,6 @@ export default colors = {
   lightShadow: 'rgba(96, 97, 112, 0.16)',
   white: '#FFFFFF',
   red: '#FF4D4F',
+  green: '#58d6eb',
+  lightGreen: '#a5eff7',
 }
